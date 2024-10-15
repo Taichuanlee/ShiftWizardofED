@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import random
+from io import StringIO
 
 st.title("班表生成應用")
 
@@ -108,44 +109,39 @@ e_count = st.slider("E 班人數", 1, 50, 3)
 n_count = st.slider("N 班人數", 1, 50, 2)
 min_matches = st.slider("每人最少的班別匹配數", 1, 6, 2)
 
-import pandas as pd
-from io import StringIO
-
-# 上傳文件的處理
-uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
-
 if uploaded_file is not None:
     # 將上傳的文件轉換為可以被 pd.read_csv 處理的格式
     try:
-        # 轉換為 StringIO，因為文件是字節流格式
         stringio = StringIO(uploaded_file.getvalue().decode("ISO-8859-1"))
         employees_df = pd.read_csv(stringio, encoding='ISO-8859-1', errors='ignore')
-        
-        st.write(employees_df)  # 顯示讀取的 DataFrame 內容作為測試
+        st.write(employees_df)
     except Exception as e:
         st.error(f"Error reading file: {str(e)}")
 
 # 添加執行按鈕
 if uploaded_file and st.button("執行班表生成"):
-    # 嘗試不同的編碼來讀取文件
-    employees_df = pd.read_csv(uploaded_file, encoding='ISO-8859-1', errors='ignore')
-    employees = employees_df.set_index('name').T.to_dict('list')
-    
-    # 生成初步班表
-    shift_needs = {"A": a_count, "E": e_count, "N": n_count}
-    months = ["January", "February", "March", "April", "May", "June"]
-    schedule_df = assign_shifts_based_on_month_preferences(employees, shift_needs, months)
-    
-    # 執行保底機制
-    second_schedule_df = ensure_minimum_matches_with_swap(schedule_df.copy(), employees, months, min_matches=min_matches)
-    
-    # 特殊班別分配
-    final_schedule_df = assign_special_shifts(second_schedule_df, months)
-    
-    # 顯示生成的班表
-    st.write("生成的最終班表：")
-    st.dataframe(final_schedule_df)
+    try:
+        employees_df = pd.read_csv(StringIO(uploaded_file.getvalue().decode("ISO-8859-1")))
+        employees = employees_df.set_index('name').T.to_dict('list')
 
-    # 提供下載選項
-    csv = final_schedule_df.to_csv(index=False)
-    st.download_button("下載班表 (CSV)", csv, "schedule.csv", "text/csv")
+        # 生成初步班表
+        shift_needs = {"A": a_count, "E": e_count, "N": n_count}
+        months = ["January", "February", "March", "April", "May", "June"]
+        schedule_df = assign_shifts_based_on_month_preferences(employees, shift_needs, months)
+
+        # 執行保底機制
+        second_schedule_df = ensure_minimum_matches_with_swap(schedule_df.copy(), employees, months, min_matches=min_matches)
+
+        # 特殊班別分配
+        final_schedule_df = assign_special_shifts(second_schedule_df, months)
+
+        # 顯示生成的班表
+        st.write("生成的最終班表：")
+        st.dataframe(final_schedule_df)
+
+        # 提供下載選項
+        csv = final_schedule_df.to_csv(index=False)
+        st.download_button("下載班表 (CSV)", csv, "schedule.csv", "text/csv")
+
+    except Exception as e:
+        st.error(f"Error during schedule generation: {str(e)}")
