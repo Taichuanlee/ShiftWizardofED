@@ -111,9 +111,9 @@ min_matches = st.slider("每人最少的班別匹配數", 1, 6, 2)
 
 if uploaded_file is not None:
     try:
-        # 將上傳的文件轉換為可以被 pd.read_csv 處理的格式
+        # 將上傳的文件轉換為可以被 pd.read_csv 處理的格式，並強制 name 列為字符串類型
         stringio = StringIO(uploaded_file.getvalue().decode("ISO-8859-1"))
-        employees_df = pd.read_csv(stringio, encoding='ISO-8859-1')
+        employees_df = pd.read_csv(stringio, dtype={"name": str}, encoding='ISO-8859-1')
         st.write(employees_df)
     except Exception as e:
         st.error(f"Error reading file: {str(e)}")
