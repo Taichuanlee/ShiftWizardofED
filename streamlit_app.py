@@ -110,8 +110,8 @@ min_matches = st.slider("每人最少的班別匹配數", 1, 6, 2)
 
 # 添加執行按鈕
 if uploaded_file and st.button("執行班表生成"):
-    # 讀取上傳的 CSV 文件時，指定編碼
-    employees_df = pd.read_csv(uploaded_file, encoding='utf-8', errors='ignore')
+    # 嘗試不同的編碼來讀取文件
+    employees_df = pd.read_csv(uploaded_file, encoding='ISO-8859-1', errors='ignore')
     employees = employees_df.set_index('name').T.to_dict('list')
     
     # 生成初步班表
