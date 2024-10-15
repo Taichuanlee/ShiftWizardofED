@@ -108,6 +108,23 @@ e_count = st.slider("E 班人數", 1, 50, 3)
 n_count = st.slider("N 班人數", 1, 50, 2)
 min_matches = st.slider("每人最少的班別匹配數", 1, 6, 2)
 
+import pandas as pd
+from io import StringIO
+
+# 上傳文件的處理
+uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
+
+if uploaded_file is not None:
+    # 將上傳的文件轉換為可以被 pd.read_csv 處理的格式
+    try:
+        # 轉換為 StringIO，因為文件是字節流格式
+        stringio = StringIO(uploaded_file.getvalue().decode("ISO-8859-1"))
+        employees_df = pd.read_csv(stringio, encoding='ISO-8859-1', errors='ignore')
+        
+        st.write(employees_df)  # 顯示讀取的 DataFrame 內容作為測試
+    except Exception as e:
+        st.error(f"Error reading file: {str(e)}")
+
 # 添加執行按鈕
 if uploaded_file and st.button("執行班表生成"):
     # 嘗試不同的編碼來讀取文件
