@@ -103,12 +103,13 @@ def check_shift_needs(final_df, shift_needs, months):
 uploaded_file = st.file_uploader("上傳員工選擇文件 (CSV)", type="csv")
 
 # 設定班別需求
-a_count = st.slider("A 班人數", 1, 50, 25)
-e_count = st.slider("E 班人數", 1, 50, 15)
-n_count = st.slider("N 班人數", 1, 50, 10)
+a_count = st.slider("A 班人數", 1, 50, 5)
+e_count = st.slider("E 班人數", 1, 50, 3)
+n_count = st.slider("N 班人數", 1, 50, 2)
 min_matches = st.slider("每人最少的班別匹配數", 1, 6, 2)
 
-if uploaded_file:
+# 添加執行按鈕
+if uploaded_file and st.button("執行班表生成"):
     employees_df = pd.read_csv(uploaded_file)
     employees = employees_df.set_index('name').T.to_dict('list')
     
